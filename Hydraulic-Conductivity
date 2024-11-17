@@ -1,0 +1,291 @@
+import numpy as np
+import math
+
+def falling_head_method():
+    # Method for hydraulic conductivity calculation using falling head method
+    time = float(input("Enter the time of fall (in seconds): "))
+    head_start = float(input("Enter the initial head (in meters): "))
+    head_end = float(input("Enter the final head (in meters): "))
+    length = float(input("Enter the length of the soil sample (in meters): "))
+    inside_diameter_standpipe = float(input("Enter the inside diameter of the standpipe (in meters): "))
+    inside_diameter_specimen = float(input("Enter the inside diameter of the specimen (in meters): "))
+
+    area_standpipe = np.pi * (inside_diameter_standpipe**2) / 4
+    area_specimen = np.pi * (inside_diameter_specimen**2) / 4
+
+    hydraulic_conductivity = 2.3 * (area_standpipe * length / (time * area_specimen)) * np.log(head_start / head_end)
+    return hydraulic_conductivity
+
+def constant_head_method():
+    # Method for hydraulic conductivity calculation using constant head method
+    length = float(input("Enter the length of the soil sample (in meters): "))
+    area = float(input("Enter the cross-sectional area of the soil sample (in square meters): "))
+    head_difference = float(input("Enter the constant head difference (in meters): "))
+    flow_rate = float(input("Enter the measured flow rate (in cubic meters per second): "))
+    elapsed_time = float(input("Enter the elapsed time (in seconds): "))
+
+    hydraulic_conductivity = (flow_rate * length) / (head_difference * area * elapsed_time)
+    return hydraulic_conductivity
+
+
+def hooghoudts_method():
+    # Method for hydraulic conductivity calculation using Hooghoudt's method
+    # Input parameters
+    radius = float(input("Enter the radius of the cylindrical hole (in centimeters): "))
+    initial_water_level = float(input("Enter the initial water level at time t = 0 (in centimeters): "))
+    final_water_level = float(input("Enter the water level at time t (in centimeters): "))
+    elapsed_time = float(input("Enter the time elapsed since the first measurement of water level (in seconds): "))
+    depth_bottom_hole = float(input("Enter the depth of the bottom of the hole relative to the water table (in centimeters): "))
+
+    # Calculate average depth of water level in the hole
+    average_depth_water_level = (initial_water_level + final_water_level) / 2
+
+    # Calculate factor F
+    factor_F = (4000 * radius / average_depth_water_level) * (20 + (depth_bottom_hole / radius)) * (2 - (average_depth_water_level / depth_bottom_hole))
+
+    # Calculate horizontal saturated hydraulic conductivity (K)
+    hydraulic_conductivity = factor_F * (initial_water_level - final_water_level) / elapsed_time
+
+    return hydraulic_conductivity
+
+def ernsts_method():
+    # Implementation of Ernst’s Method (Inactive)
+    print("This method is inactive.")
+
+def ernsts_method_layered_soil():
+    # Implementation of Ernst’s Method Layered Soil (Inactive)
+    print("This method is inactive.")
+
+def augerhole_method():
+    print("Auger Method")
+    print("Select a sub-method:")
+    print("1. Ernst’s Method")
+    print("2. Hooghoudt’s Method")
+    print("3. Ernst’s Method Layered Soil")
+
+    sub_method_choice = int(input("Enter the number of the selected sub-method: "))
+
+    if sub_method_choice == 1:
+        ernsts_method()
+    elif sub_method_choice == 2:
+        hooghoudts_method()
+    elif sub_method_choice == 3:
+        ernsts_method_layered_soil()
+    else:
+        print("Invalid choice. Please select a valid sub-method.")
+
+
+def piezometer_method():
+    # Method for hydraulic conductivity calculation using piezometer method
+    diameter = float(input("Enter the diameter of the hole under the pipe (in centimeters): "))
+    y1 = float(input("Enter the distance between water level and balanced stability level at time t1 (in centimeters): "))
+    y2 = float(input("Enter the distance between water level and balanced stability level at time t2 (in centimeters): "))
+    shape_factor = float(input("Enter the shape factor (in centimeters): "))
+    t1 = float(input("Enter the time t1 (in seconds): "))
+    t2 = float(input("Enter the time t2 (in seconds): "))
+
+    hydraulic_conductivity = (6250 * np.pi * ((diameter / 2)**2) * np.log(y1 / y2)) / (shape_factor * (t1 - t2))
+
+    return hydraulic_conductivity
+
+def guelph_permeameter_method():
+    # Method for hydraulic conductivity calculation using Guelph permeameter method
+    Q = float(input("Enter the discharge (Q): "))
+    H = float(input("Enter the steady depth of water in the hole (H): "))
+    a = float(input("Enter the radius of the hole (a): "))
+    soil_type = int(input("Enter the soil type (1-Compact clay, 2-Structureless heavy texture clay, 3-Wide range of soils, 4-Coarse sand and gravel): "))
+
+    # Constants
+    pi = np.pi
+
+    # Calculate shape factor C using Glover's equation
+    C = np.arcsinh(H / a) - np.sqrt((a / H)**2 + 1) + (a / H)
+
+    # Determine α* based on soil type
+    alpha_star = 1  # Default for compact clay (Marian sediment)
+
+    if soil_type == 2:
+        alpha_star = 4  # Structureless heavy texture clay
+    elif soil_type == 3:
+        alpha_star = 12  # Wide range of soils with structure
+    elif soil_type == 4:
+        alpha_star = 36  # Coarse sand and gravel
+
+    # Calculate hydraulic conductivity using Guelph method
+    Kfs = (C * Q) / (2 * pi * H**2 + C * pi * a**2 / 2 + 2 * pi * H * alpha_star * a)
+
+    print(f"\nHydraulic Conductivity (Kfs): {Kfs}")
+
+def double_tube_permeameter_method():
+    # Method for hydraulic conductivity calculation using double tube permeameter method
+    print("This method is inactive.")
+
+def pumped_borehole_method():
+    # Method for hydraulic conductivity calculation using pumped borehole method
+    # Input parameters
+    radius = float(input("Enter the radius of the borehole well (in meters): "))
+    discharge = float(input("Enter the discharge (cubic meters per minute): "))
+    water_depth = float(input("Enter the water depth in the well (in meters): "))
+    stabilization_distance = float(input("Enter the stabilization distance to the limiting layer (in meters): "))
+
+    # Calculate Tu/h ratio
+    tu_over_h = stabilization_distance / water_depth
+
+    # Check the mode and calculate hydraulic conductivity (K) accordingly
+    if tu_over_h >= 3:
+        hydraulic_conductivity = (144 * discharge / (2 * math.pi * water_depth**2)) * (math.log((water_depth/radius) + math.sqrt((water_depth/radius)**2 + 1)) - 1)
+    elif 3 >= tu_over_h >= 1:
+        hydraulic_conductivity = 144 * discharge * (3 * math.log(radius/water_depth) / (math.pi * water_depth * (water_depth + 2 * stabilization_distance)))
+    else:
+        print("Invalid input: Tu/h should be greater than or equal to 1.")
+
+    return hydraulic_conductivity
+
+def infiltrometer_method():
+    # Method for hydraulic conductivity calculation using infiltrometer method
+    print("This method is inactive.")
+
+def inversed_augerhole_method():
+    # Method for hydraulic conductivity calculation using inversed auger hole method
+    well_radius = float(input("Enter the radius of the well (in centimeters): "))
+    initial_water_level = float(input("Enter the initial water level at the start of measurement (in centimeters): "))
+    final_water_level = float(input("Enter the water level at time t (in centimeters): "))
+    elapsed_time = float(input("Enter the elapsed time from the beginning of measuring the water level drop (in seconds): "))
+
+    hydraulic_conductivity = 1.15 * well_radius * (np.log(initial_water_level + (well_radius / 2)) - np.log(final_water_level + (well_radius / 2))) / elapsed_time
+    return hydraulic_conductivity
+
+def pumping_tests_method():
+    # Method for hydraulic conductivity calculation using pumping tests method
+    print("This method is inactive.")
+
+def pore_size_distribution():
+    # Method for hydraulic conductivity calculation using pore size distribution
+    print("This method is inactive.")
+
+def grain_size_distribution():
+    # Method for hydraulic conductivity calculation using grain size distribution
+    print("This method is inactive.")
+
+def soil_texture():
+    # Method for hydraulic conductivity calculation using soil texture
+    print("This method is inactive.")
+
+def soil_mapping_unit():
+    # Method for hydraulic conductivity calculation using soil mapping unit
+    print("This method is inactive.")
+
+def in_situ_field_measurements():
+    # Function to calculate hydraulic conductivity using in-situ field measurements
+    print("In-situ Field Measurements")
+
+    # Display method options to the user
+    print("Choose method:")
+    print("1. Auger Hole Method")
+    print("2. Piezometer Method")
+    print("3. Guelph Permeameter Method")
+    print("4. Double Tube Permeameter Method")
+    print("5. Pumped Borehole Method")
+    print("6. Infiltrometer Method")
+    print("7. Inversed Auger Hole Method")
+    print("8. Pumping Tests Method")
+
+    # Ask the user to enter the number corresponding to their chosen method
+    method_choice = input("Enter the number of your chosen method: ")
+
+    if method_choice == "1":
+        augerhole_method()
+    elif method_choice == "2":
+        piezometer_method()
+    elif method_choice == "3":
+        guelph_permeameter_method()
+    elif method_choice == "4":
+        double_tube_permeameter_method()
+    elif method_choice == "5":
+        pumped_borehole_method()
+    elif method_choice == "6":
+        infiltrometer_method()
+    elif method_choice == "7":
+        inversed_augerhole_method()
+    elif method_choice == "8":
+        pumping_tests_method()
+    else:
+        print("Invalid choice. Please enter a valid number.")
+
+def experimental_approach():
+    # Function to calculate hydraulic conductivity using experimental approach
+    print("Experimental Approach")
+
+    # Display method options to the user
+    print("Choose method:")
+    print("1. Laboratory Method")
+    print("2. In-situ Field Measurements")
+
+    # Ask the user to enter the number corresponding to their chosen method
+    method_choice = input("Enter the number of your chosen method: ")
+
+    if method_choice == "1":
+        laboratory_method()
+    elif method_choice == "2":
+        in_situ_field_measurements()
+    else:
+        print("Invalid choice. Please enter a valid number.")
+
+def pore_size_distribution():
+    # Method for hydraulic conductivity calculation using pore size distribution
+    print("This method is inactive.")
+
+def grain_size_distribution():
+    # Method for hydraulic conductivity calculation using grain size distribution
+    print("This method is inactive.")
+
+def soil_texture():
+    # Method for hydraulic conductivity calculation using soil texture
+    print("This method is inactive.")
+
+def soil_mapping_unit():
+    # Method for hydraulic conductivity calculation using soil mapping unit
+    print("This method is inactive.")
+
+def empirical_approach():
+    # Function to calculate hydraulic conductivity using empirical approach
+    print("Empirical Approach")
+     # Display method options to the user
+    print("Choose method:")
+    print("1. Pore Size Distribution")
+    print("2. Grain Size Distribution")
+    print("3. Soil Texture")
+    print("4. Soil Mapping Unit")
+
+    # Ask the user to enter the number corresponding to their chosen method
+    method_choice = input("Enter the number of your chosen method: ")
+     
+    if method_choice == "1":
+        pore_size_distribution()
+    elif method_choice == "2":
+        grain_size_distribution()
+    elif method_choice == "3":
+        soil_texture()
+    elif method_choice == "4":
+        soil_mapping_unit()
+    else:
+        print("Invalid choice. Please enter a valid number.")
+
+def main():
+    # Main function to handle user input and call the appropriate approach
+    print("Hydraulic Conductivity Calculation")
+
+    # Ask the user for their preferred approach
+    approach = input("Choose approach (experimental/empirical): ").lower()
+
+    if approach == "experimental":
+        experimental_approach()
+    elif approach == "empirical":
+        empirical_approach()
+    else:
+        print("Invalid approach. Please choose either experimental or empirical.")
+
+if __name__ == "__main__":
+    main()
+
+
